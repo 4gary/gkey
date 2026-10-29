@@ -1,0 +1,63 @@
+# gkeystrokes libraries, pinned with hashes (Windows x64, Python 3.13). Install with:
+#     python -m pip install --require-hashes -r requirements.lock
+# Every package is listed with what it's for. None of them phone home: no update checks, telemetry or
+# crash reporting. The app's own outgoing-network block (gk/privacy.py) covers them at run time too.
+
+# CPU, memory, disk and network counters; the Privacy proof socket list. Reads local OS tables only.
+psutil==7.0.0 \
+    --hash=sha256:4cf3d4eb1aa9b348dec30105c55cd9b7d4629285735a102beb4441e38db90553 \
+    --hash=sha256:7be9c3eba38beccb6495ea33afd982a44074b78f28c434a1f51cc07fd315c456
+
+# the tray icon (Win32 shell API). No network code.
+pystray==0.19.5 \
+    --hash=sha256:a0c2229d02cf87207297c22d86ffc57c86c227517b038c0d3c59df79295ac617
+
+# draws the tray icon image. No network code.
+pillow==11.2.1 \
+    --hash=sha256:36d6b82164c39ce5482f649b437382c0fb2395eabc1e2b1702a6deb8ad647d6e \
+    --hash=sha256:74ee3d7ecb3f3c05459ba95eed5efa28d6092d751ce9bf20e3e253a4e497e691 \
+    --hash=sha256:a64dd61998416367b7ef979b73d3a85853ba9bec4c2925f74e588879a58716b6
+
+# the mini display window (Edge WebView2). Loads only http://127.0.0.1.
+pywebview==6.2.1 \
+    --hash=sha256:71b7136752e40824655304d938efb62014218d1a90bd8e87e1cbdb1ce9c466af \
+    --hash=sha256:9d07275f53894ab4d5e2e0e996227193e7187dec276d9b624dccbce029216b46
+
+# Python 2/3 helpers used by pystray. No network code. (needed by pystray)
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
+    --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
+
+# lets pywebview call the .NET WebView2 control. No network code. (needed by pywebview)
+pythonnet==3.2.1 \
+    --hash=sha256:c86e8dd31268f6e0c48fcc4d6030041316d49ed2764a1cb6ea8c37876e07c572 \
+    --hash=sha256:dd5668b74b0c903d9a24e1ba86f728fc490f8e919d56b3c24bf06739b9ee2b7f
+
+# small helper used by pywebview. No network code. (needed by pywebview)
+proxy_tools==0.1.0 \
+    --hash=sha256:ccb3751f529c047e2d8a58440d86b205303cf0fe8146f784d1cbcd94f0a28010
+
+# pywebview's built-in file server, used only for local file URLs. gkeystrokes passes an http URL, so it never starts. (needed by pywebview)
+bottle==0.13.4 \
+    --hash=sha256:045684fbd2764eac9cdeb824861d1551d113e8b683d8d26e296898d3dd99a12e \
+    --hash=sha256:787e78327e12b227938de02248333d788cfe45987edca735f8f88e03472c3f47
+
+# type hints used by pywebview. No network code. (needed by pywebview)
+typing_extensions==4.16.0 \
+    --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8 \
+    --hash=sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5
+
+# loads the .NET runtime for pythonnet. No network code. (needed by pythonnet)
+clr_loader==0.3.1 \
+    --hash=sha256:2e073e9aaf49d1ae2f56ecba27987ad5fb68be4bcd9dd34a5bed8f0e4e128366 \
+    --hash=sha256:cbad189de20d202a7d621956b0fc38049e13c9bf7ca2923441eff725cd121aa1
+
+# C bindings used by clr_loader. No network code. (needed by clr_loader)
+cffi==1.17.1 \
+    --hash=sha256:1c39c6016c32bc48dd54561950ebd6836e1670f2ae46128f67cf49e789c52824 \
+    --hash=sha256:f6a16c31041f09ead72d69f583767292f750d24913dadacf5756b966aacb3f1a
+
+# C parser used by cffi. No network code. (needed by cffi)
+pycparser==2.22 \
+    --hash=sha256:491c8be9c040f5390f5bf44a5b07752bd07f56edf992381b05c701439eec10f6 \
+    --hash=sha256:c3702b6d3dd8c7abc1afa565d7e63d53a1d0bd86cdc24edd75470f4de499cfcc

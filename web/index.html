@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gkeystrokes</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="8" width="56" height="48" rx="12" fill="none" stroke="var(--accent)" stroke-width="5"/><g fill="var(--accent)"><rect x="13" y="18" width="8" height="8" rx="2"/><rect x="24" y="18" width="8" height="8" rx="2"/><rect x="35" y="18" width="8" height="8" rx="2"/><rect x="46" y="18" width="6" height="8" rx="2"/><rect x="13" y="30" width="8" height="8" rx="2"/><rect x="24" y="30" width="8" height="8" rx="2"/><rect x="35" y="30" width="8" height="8" rx="2"/><rect x="46" y="30" width="6" height="8" rx="2"/><rect x="18" y="42" width="28" height="6" rx="2"/></g></svg>
+    gkeystrokes
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="keyboard">Keyboard</button>
+    <button class="tab" data-tab="mouse">Mouse</button>
+    <button class="tab" data-tab="network">Network</button>
+    <button class="tab" data-tab="power">GPU &amp; Power</button>
+    <button class="tab" data-tab="system">System</button>
+    <button class="tab" data-tab="apps">Apps</button>
+    <button class="tab" data-tab="gaming">Gaming</button>
+    <button class="tab" data-tab="records">Records</button>
+    <button class="tab" data-tab="macros" hidden>Macros</button>
+    <button class="tab" data-tab="layouts" hidden>Layouts</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </nav>
+  <div class="spacer"></div>
+  <span class="gamechip" id="gameChip" hidden></span>
+  <div class="status" id="status"><span class="dot"></span><span id="statusText">Recording</span></div>
+  <button class="btn" id="pauseBtn">Pause</button>
+</header>
+
+<main>
+  <!-- range filter: moved into the active tab by app.js -->
+  <div class="filters" id="filters">
+    <div class="seg" id="rangeSeg">
+      <button data-range="today" class="on">Today</button>
+      <button data-range="7d">7 days</button>
+      <button data-range="30d">30 days</button>
+      <button data-range="year">12 months</button>
+      <button data-range="all">All time</button>
+    </div>
+    <div class="seg" id="modeSeg" title="Gaming = input while a game was the window in front">
+      <button data-mode="all" class="on">All</button>
+      <button data-mode="normal">Normal</button>
+      <button data-mode="gaming">Gaming</button>
+    </div>
+    <span class="range-label" id="rangeLabel"></span>
+  </div>
+
+  <!-- ================= OVERVIEW ================= -->
+  <section class="view active" id="view-overview">
+    <div class="range-slot"></div>
+    <div class="layout-bar">
+      <button class="btn" id="layoutEdit">Edit layout</button>
+      <button class="btn" id="layoutReset" hidden>Reset to default</button>
+      <span class="muted" id="layoutHint" hidden>Drag cards to move them. Click the eye to hide one.</span>
+    </div>
+    <div class="widgets" id="ovWidgets">
+      <div class="widget" data-widget="live-keys" data-size="third">
+        <div class="card hero">
+          <div class="label">Keystrokes today</div>
+          <div class="value" id="lvKeys">0</div>
+          <div class="meta" id="lvKeysMeta">&nbsp;</div>
+          <div class="now-app"><span>Now using</span><b id="lvApp">-</b></div>
+        </div>
+      </div>
+      <div class="widget" data-widget="live-tiles" data-size="wide"><div class="tiles" id="liveTiles"></div></div>
+      <div class="widget fade" data-widget="trends" data-size="full"><div class="minis" id="ovMinis"></div></div>
+      <div class="widget fade" data-widget="punchcard" data-size="half">
+        <div class="card"><h2>When you're active</h2><p class="sub">Keys + clicks by weekday and hour</p><div id="ovPunch"></div></div>
+      </div>
+      <div class="widget fade" data-widget="top-apps" data-size="half">
+        <div class="card"><h2>Top apps</h2><p class="sub">By active time</p><div id="ovApps"></div></div>
+      </div>
+      <div class="widget fade" data-widget="top-keys" data-size="half">
+        <div class="card"><h2>Most-pressed keys</h2><p class="sub">Top 10</p><div id="ovKeys"></div></div>
+      </div>
+      <div class="widget fade" data-widget="fun-facts" data-size="half">
+        <div class="card"><h2>Fun facts</h2><p class="sub">All time</p><div class="facts facts-200" id="ovFacts"></div></div>
+      </div>
+      <div class="widget" data-widget="calendar" data-size="full">
+        <div class="card">
+          <div class="cctl"><select id="calRange" title="Time frame for the calendar" aria-label="Time frame for the calendar"></select></div>
+          <div class="card-head"><h2 id="calTitle">Last 12 months</h2><span class="muted" id="calTotal"></span></div>
+          <p class="sub">Keystrokes per day</p>
+          <div class="calwrap"><div id="ovCal"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= KEYBOARD ================= -->
+  <section class="view" id="view-keyboard">
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="tiles" id="kbTiles"></div>
+      <div class="card mt">
+        <div class="card-head"><h2>Keyboard heatmap</h2><span class="muted" id="kbHeatNote"></span></div>
+        <p class="sub">Darker/brighter = pressed more. Hover a key for its count.</p>
+        <div class="kb" id="kbHeat"></div>
+        <div class="scale" id="kbScale"></div>
+      </div>
+      <div class="grid cols-3 mt">
+        <div class="card span-2"><h2>Keystrokes over time</h2><p class="sub" id="kbSeriesSub"></p><div id="kbSeries"></div></div>
+        <div class="card"><h2>Typing speed over time</h2><p class="sub">Average WPM while typing</p><div id="kbWpm"></div></div>
+      </div>
+      <div class="grid cols-2 mt">
+        <div class="card"><h2>Top keys</h2><p class="sub">Top 20</p><div id="kbTop"></div></div>
+        <div class="card"><h2>Shortcuts</h2><p class="sub">Ctrl / Alt / Win combos</p><div id="kbCombos"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MOUSE ================= -->
+  <section class="view" id="view-mouse">
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="tiles" id="msTiles"></div>
+      <div class="card mt">
+        <div class="card-head"><h2>Where you click</h2><span class="muted" id="msMapNote"></span></div>
+        <p class="sub">All clicks across your monitors</p>
+        <div class="clickmap"><canvas id="msMap"></canvas></div>
+      </div>
+      <div class="grid cols-3 mt">
+        <div class="card"><h2>Clicks over time</h2><p class="sub">All buttons</p><div id="msClicks"></div></div>
+        <div class="card"><h2>Mouse distance over time</h2><p class="sub">Meters travelled</p><div id="msDist"></div></div>
+        <div class="card"><h2>Buttons</h2><p class="sub">Share of clicks</p><div id="msButtons"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NETWORK ================= -->
+  <section class="view" id="view-network">
+    <div class="card">
+      <div class="card-head"><h2>Live speed</h2><span class="muted" id="netNow"></span></div>
+      <p class="sub">Last 2 minutes</p>
+      <div id="netLive"></div>
+    </div>
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="tiles" id="netTiles"></div>
+      <div class="grid cols-3 mt">
+        <div class="card span-2"><h2>Data used over time</h2><p class="sub">Download and upload</p><div id="netSeries"></div></div>
+        <div class="card"><h2>By adapter</h2><p class="sub">Virtual and VPN adapters are skipped</p><div id="netIfaces"></div></div>
+      </div>
+      <div class="grid cols-3 mt">
+        <div class="card span-2"><h2>Adapters over time</h2><p class="sub">Download ↓ and upload ↑ for the two busiest adapters</p><div id="netIfSeries"></div></div>
+        <div class="card"><h2>Download bursts</h2><p class="sub">Busiest hours in this range · click one to open that day</p><div id="netBursts"></div></div>
+      </div>
+      <div class="card mt" id="naCard"><h2>What used my data</h2>
+        <div class="empty" id="naNone">Per-app network data arrives with the engine update.</div>
+        <div id="naBox" hidden>
+          <div class="inline ws-bar" id="naAdmin" hidden><span class="muted">Turn on Run as administrator to see per-program data.</span>
+            <button class="btn" id="naToSettings" type="button">Open Settings</button></div>
+          <div class="inline ws-bar"><span class="muted" id="naSrum"></span>
+            <button class="btn" id="naBackfill" type="button" hidden>Load Windows history</button></div>
+          <div class="grid cols-3 mt">
+            <div class="span-2"><h3 class="minor">Top programs in this range · click one for its own chart</h3><div id="naTop"></div></div>
+            <div><h3 class="minor">Right now</h3><div class="table-wrap"><table class="data" id="naNow"></table></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid cols-2 mt" id="naCharts" hidden>
+        <div class="card"><h2>Programs over time</h2><p class="sub">Downloaded by the five busiest programs, the rest as Other</p><div id="naSeries"></div></div>
+        <div class="card"><h2 id="naOneTitle">One program</h2><p class="sub">Download ↓ and upload ↑ · click a program above to switch</p><div id="naOne"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GPU & POWER ================= -->
+  <section class="view" id="view-power">
+    <div class="card pw-live" id="pwLive"></div>
+    <div class="card mt"><div class="card-head"><h2>GPU details</h2><span class="muted" id="pwGpuMeta"></span></div>
+      <p class="sub">Live from the NVIDIA driver</p><div class="gpu-grid" id="pwGpuInfo"></div></div>
+    <div class="grid cols-3 mt">
+      <div class="card"><h2>GPU load</h2><p class="sub">Last 2 minutes</p><div id="pwLoadChart"></div></div>
+      <div class="card"><h2>Power draw</h2><p class="sub">Last 2 minutes</p><div id="pwWattChart"></div></div>
+      <div class="card"><h2>Using the GPU right now</h2><p class="sub">GPU load · video memory</p><div id="pwTopNow"></div></div>
+    </div>
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="tiles" id="pwTiles"></div>
+      <div class="grid cols-3 mt">
+        <div class="card span-2"><h2>Energy used</h2><p class="sub" id="pwEnergySub">By part · hover a bar for the cost</p><div id="pwEnergy"></div></div>
+        <div class="card"><h2>Where the power goes</h2><p class="sub">Share of energy in this range</p><div id="pwSplit"></div></div>
+      </div>
+      <div class="grid cols-3 mt">
+        <div class="card span-2"><h2>What uses your GPU</h2><p class="sub">GPU work = time at full load. Energy = each app's share of GPU power.</p>
+          <div class="table-wrap"><table class="data" id="pwApps"></table></div></div>
+        <div class="card"><h2>Fun facts</h2><p class="sub">Energy in this range</p><div class="facts facts-1" id="pwFacts"></div></div>
+      </div>
+      <div class="card mt"><h2>GPU load over time</h2><p class="sub">Average while the PC was on</p><div id="pwUtil"></div></div>
+      <p class="muted mt small" id="pwNote"></p>
+    </div>
+  </section>
+
+  <!-- ================= SYSTEM ================= -->
+  <section class="view" id="view-system">
+    <div class="tiles fixed cols-4 sys-heroes" id="syLive"></div>
+    <div class="grid cols-4 mt">
+      <div class="card"><h2>CPU</h2><p class="sub">Last 2 minutes</p><div id="syCpuChart"></div></div>
+      <div class="card"><h2>Memory</h2><p class="sub">Last 2 minutes</p><div id="syRamChart"></div></div>
+      <div class="card"><h2>Disk</h2><p class="sub">Last 2 minutes</p><div id="syDiskChart"></div></div>
+      <div class="card"><h2>GPU</h2><p class="sub">Last 2 minutes</p><div id="syGpuChart"></div></div>
+    </div>
+    <div class="grid cols-2 mt">
+      <div class="card"><h2>Busiest programs right now</h2><p class="sub">Share of the whole CPU · memory in use</p><div id="syTopNow"></div></div>
+      <div class="card"><h2>Drives</h2><p class="sub">Activity right now, then space used</p><div id="syDrives"></div><div id="sySpace" class="mt"></div></div>
+    </div>
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="tiles" id="syTiles"></div>
+      <div class="minis mt" id="syMinis"></div>
+      <div class="grid cols-3 mt">
+        <div class="card"><h2>CPU over time</h2><p class="sub">Average and peak per bucket</p><div id="sxCpu"></div>
+          <p class="sub mt">CPU temperature, per-core load and per-core clocks: not available yet.</p></div>
+        <div class="card"><h2>GPU over time</h2><p class="sub">Average and peak per bucket</p><div id="sxGpu"></div></div>
+        <div class="card"><h2>Memory &amp; disk over time</h2><p class="sub">Average and peak per bucket</p><div id="sxSys"></div></div>
+      </div>
+      <div class="grid cols-2 mt">
+        <div class="card"><h2>Peak moments</h2><p class="sub">Busiest hours in this range, with the program that did most of the work · click one to open that day</p>
+          <h3 class="minor">CPU</h3><div id="syPeakCpu"></div><h3 class="minor mt">GPU</h3><div id="syPeakGpu"></div></div>
+        <div class="card"><h2>Top programs</h2><p class="sub">In this range</p>
+          <h3 class="minor">By CPU time</h3><div id="syTopCpu"></div><h3 class="minor mt">By GPU work</h3><div id="syTopGpu"></div>
+          <h3 class="minor mt">By peak memory</h3><div id="syTopRam"></div></div>
+      </div>
+      <div class="card mt"><h2>What's working your PC</h2>
+        <p class="sub">CPU time, memory, disk and GPU use per program. Avg CPU = share of the whole CPU while it was running.</p>
+        <div class="table-wrap"><table class="data" id="syApps"></table></div></div>
+    </div>
+  </section>
+
+  <!-- ================= APPS ================= -->
+  <section class="view" id="view-apps">
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="card">
+        <h2>Apps</h2><p class="sub">Active time = foreground and you did something in the last minute. Click a column to sort.</p>
+        <div class="table-wrap"><table class="data" id="appsTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GAMING ================= -->
+  <section class="view" id="view-gaming">
+    <div class="card gm-live" id="gmLive"></div>
+    <div class="range-slot"></div>
+    <div class="fade">
+      <div class="tiles" id="gmTiles"></div>
+      <div class="grid cols-3 mt">
+        <div class="card span-2"><h2>Time in game</h2><p class="sub">Active time while a game was the window in front</p><div id="gmSeries"></div></div>
+        <div class="card"><h2>By game</h2><p class="sub">Active time</p><div id="gmGames"></div></div>
+      </div>
+      <div class="card mt">
+        <h2>Keys you press in games</h2><p class="sub">Hover a key for its count</p>
+        <div class="kb" id="gmKb"></div>
+      </div>
+      <div class="grid cols-2 mt">
+        <div class="card"><h2>Where you click in games</h2><p class="sub">All monitors</p><div class="clickmap"><canvas id="gmMap"></canvas></div></div>
+        <div class="card"><h2>Sessions</h2><p class="sub">One session = game opened until it closed</p><div class="table-wrap"><table class="data" id="gmSessions"></table></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RECORDS ================= -->
+  <section class="view" id="view-records">
+    <div class="section-title">Personal bests</div>
+    <div class="tiles tiles-210" id="recTiles"></div>
+    <div class="section-title">Milestones</div>
+    <div class="card"><div class="ms" id="recMilestones"></div></div>
+    <div class="section-title">All-time totals</div>
+    <div class="tiles" id="recTotals"></div>
+  </section>
+
+  <!-- ================= SETTINGS ================= -->
+  <!-- ================= MACROS (shown only when the engine has /api/macros) ================= -->
+  <section class="view" id="view-macros">
+    <div class="card">
+      <div class="card-head"><h2>Macros</h2><span class="priv-badge" id="mcAudio"></span></div>
+      <p class="sub">A hotkey runs a few steps in order. Windows only tells gkeystrokes about the combos you pick here, never other typing.</p>
+      <div class="inline ws-bar">
+        <button class="btn" id="mcAdd" type="button">+ New macro</button>
+        <select class="inp" id="mcPreset" aria-label="Quick add">
+          <option value="">Quick add…</option>
+          <option value="0">Mute / unmute microphone</option>
+          <option value="1">Mute / unmute headset</option>
+          <option value="2">Mute both (going away)</option>
+          <option value="3">Play / pause music</option>
+          <option value="4">Next track</option>
+          <option value="5">Lock and screens off</option>
+          <option value="6">Pause tracking</option>
+          <option value="7">Show / hide the mini window</option>
+          <option value="8">Work mode (apply a workspace)</option>
+        </select>
+        <span class="grow"></span>
+        <span class="muted" id="mcState"></span>
+        <button class="btn" id="mcDiscard" type="button" disabled>Discard</button>
+        <button class="btn primary" id="mcSave" type="button" disabled>Save</button>
+      </div>
+      <p class="sub mt-s" id="mcHint"></p>
+      <div id="mcList"></div>
+    </div>
+  </section>
+
+  <!-- ================= LAYOUTS (shown only when the engine has /api/layouts) ================= -->
+  <section class="view" id="view-layouts">
+    <div class="card">
+      <div class="card-head"><h2>Your monitors</h2><span class="muted">Drawn to scale · click one to edit its zones</span></div>
+      <div id="lyMonitors"></div>
+      <h3 class="minor mt">Zones: <span id="lyZoneFor"></span></h3>
+      <p class="sub">Shift-drag a window to drop it into a zone. Workspaces below can use them too.</p>
+      <div class="inline ws-bar" id="lyZonePresets">
+        <button class="btn" type="button" data-z="halves-h">Top / bottom</button>
+        <button class="btn" type="button" data-z="halves-v">Left / right</button>
+        <button class="btn" type="button" data-z="thirds-v">3 columns</button>
+        <button class="btn" type="button" data-z="thirds-h">3 rows</button>
+        <button class="btn" type="button" data-z="quarters">Quarters</button>
+        <span class="inline">Grid <input class="inp num small" id="lyCols" type="number" min="1" max="6" value="2" aria-label="Columns">
+          × <input class="inp num small" id="lyRows" type="number" min="1" max="4" value="2" aria-label="Rows">
+          <button class="btn" type="button" data-z="grid">Use grid</button></span>
+        <button class="linkbtn" type="button" id="lyZoneReset" hidden>use the shared zones</button>
+      </div>
+      <div class="chips" id="lyZoneList"></div>
+    </div>
+    <div class="card mt">
+      <div class="card-head"><h2>Workspaces</h2><span class="muted">Programs are matched by file name only, never by window title</span></div>
+      <div class="inline ws-bar">
+        <button class="btn" id="lyAdd" type="button">+ New workspace</button>
+        <input class="inp" id="lyCaptureName" maxlength="60" placeholder="Name, e.g. Work mode" aria-label="Name for the saved layout">
+        <button class="btn" id="lyCapture" type="button" title="Make a workspace from the windows on screen now">Save what I have now</button>
+        <span class="grow"></span>
+        <span class="muted" id="lyState"></span>
+        <button class="btn" id="lyDiscard" type="button" disabled>Discard</button>
+        <button class="btn primary" id="lySave" type="button" disabled>Save</button>
+      </div>
+      <div id="lyWorkspaces"></div>
+      <datalist id="lyExes"></datalist>
+    </div>
+  </section>
+
+  <section class="view" id="view-settings">
+    <div class="grid cols-2">
+      <div class="card">
+        <h2>Tracking</h2>
+        <div class="setting">
+          <div><div class="t">Pause tracking</div><div class="d">Stop counting keys, clicks, apps and network until you resume.</div></div>
+          <label class="switch"><input type="checkbox" id="setPaused"><span></span></label>
+        </div>
+        <div class="setting">
+          <div><div class="t">Start with Windows</div><div class="d">Launch quietly into the tray when you sign in.</div></div>
+          <label class="switch"><input type="checkbox" id="setAutostart"><span></span></label>
+        </div>
+        <div class="setting">
+          <div><div class="t">Theme</div><div class="d">Follows Windows unless you pick one.</div></div>
+          <div class="seg" id="themeSeg"><button data-theme="">Auto</button><button data-theme="light">Light</button><button data-theme="dark">Dark</button></div>
+        </div>
+        <div class="setting">
+          <div><div class="t">Export</div><div class="d">One row per day: keys, clicks, distance, data, peaks.</div></div>
+          <a class="btn" href="api/export.csv" download>Download CSV</a>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Gaming mode</h2>
+        <div class="setting">
+          <div><div class="t">Auto-detect games</div><div class="d">Anything installed in a Steam, Epic, Xbox or Riot games folder counts, except launchers, updaters and crash handlers.</div></div>
+          <label class="switch"><input type="checkbox" id="setGamesAuto"><span></span></label>
+        </div>
+        <div class="setting block">
+          <div class="t">How it works</div>
+          <ul class="privacy">
+            <li>Gaming mode is on only while a game window is in front. Launchers like the League client never count; League's match runs as <b>League of Legends.exe</b>.</li>
+            <li>A session lasts from the first time you focus the game until it closes.</li>
+            <li>Keys you press in games don't count toward typing speed or keys/minute; they count toward <b>APM</b> (actions per minute = keys + clicks).</li>
+            <li>Mark or unmark any app as a game in the <a href="#apps">Apps</a> tab. Old data for that app moves over too.</li>
+          </ul>
+        </div>
+        <div class="setting block">
+          <div class="t">Recognized games</div>
+          <div class="d" id="setGames">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Electricity</h2>
+        <div class="setting">
+          <div><div class="t">Price per kWh</div><div class="d">From your power bill. Currency symbol on the left.</div></div>
+          <div class="inline"><input id="pwCur" class="inp cur" maxlength="4"><input id="pwPrice" class="inp num" type="number" step="0.01" min="0"></div>
+        </div>
+        <div class="setting">
+          <div><div class="t">Rest of PC (watts)</div><div class="d">Motherboard, RAM, drives, fans. There's no sensor for these, so it's a guess.</div></div>
+          <input id="pwOther" class="inp num" type="number" step="5" min="0">
+        </div>
+        <div class="setting">
+          <div><div class="t">Monitors (watts, all together)</div><div class="d" id="pwDispHint">Counted while you've used the PC in the last 10 minutes.</div></div>
+          <input id="pwDisplay" class="inp num" type="number" step="5" min="0">
+        </div>
+        <div class="setting">
+          <div><div class="t">Power supply efficiency (%)</div><div class="d">80 Plus Gold is about 90%. The rest is lost as heat.</div></div>
+          <input id="pwEff" class="inp num" type="number" step="1" min="50" max="100">
+        </div>
+        <div class="setting">
+          <div class="d">GPU and CPU watts are measured by your hardware when it supports it.</div>
+          <div class="inline"><span class="muted" id="pwSaved"></span><button class="btn primary" id="pwSave">Save</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Phone link</h2>
+        <div class="setting">
+          <div><div class="t">View stats from other devices</div><div class="d">A view-only copy of this dashboard on port <span id="remPort">8414</span>. Works on your Wi-Fi, and anywhere with Tailscale on this PC and your phone.</div></div>
+          <label class="switch"><input type="checkbox" id="setRemote"><span></span></label>
+        </div>
+        <div class="setting block" id="remBox" hidden>
+          <div class="t">Your links</div>
+          <div class="d">Each link includes a secret key. Anyone with the link can see your stats, so keep it private.</div>
+          <div class="rem-links" id="remLinks"></div>
+          <div class="inline mt-s"><span class="muted" id="remMsg"></span><button class="btn" id="remNewKey">New key</button></div>
+        </div>
+      </div>
+      <div class="card" id="privCard">
+        <h2>Privacy proof</h2>
+        <div class="setting">
+          <div><div class="t">Nothing leaves this PC</div><div class="d" id="privSummary">Checking connections...</div></div>
+          <span class="priv-badge" id="privBadge">-</span>
+        </div>
+        <div class="setting">
+          <div><div class="t">Blocked outgoing attempts</div><div class="d">gkeystrokes stops any attempt by its own code to reach another computer, including name lookups, and counts it here. Expected: 0.</div></div>
+          <span class="priv-big" id="privBlocked">-</span>
+        </div>
+        <div class="setting">
+          <div><div class="t">Lockdown mode</div><div class="d">Keeps the phone link off, so nothing listens beyond this PC.</div></div>
+          <label class="switch"><input type="checkbox" id="setLockdown"><span></span></label>
+        </div>
+        <div class="setting" id="setAdminRow" hidden>
+          <div><div class="t">Run as administrator (per-app network use)</div><div class="d" id="setAdminNote">Adds one Windows admin prompt, then gkeystrokes restarts elevated so it can read how much each program sent and received. Only program names and byte counts are stored.</div></div>
+          <label class="switch"><input type="checkbox" id="setAdmin"><span></span></label>
+        </div>
+        <div class="setting block">
+          <div class="t">Open connections, live</div>
+          <div class="d">Every network socket held by gkeystrokes, its mini window and its dashboard window. Updates every 10 seconds while this tab is open.</div>
+          <div class="table-wrap mt-s"><table class="data priv-table" id="privTable"></table></div>
+        </div>
+        <div class="setting block">
+          <div class="t">Check it yourself</div>
+          <div class="d">This window is Microsoft Edge with background traffic turned off; its sockets are listed above. You can also open <code class="path" id="privUrl">-</code> in any browser you trust. PRIVACY.md in the gkeystrokes folder shows how to check with TCPView, netstat, Resource Monitor or the Windows Firewall log.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Your data</h2>
+        <div class="setting block">
+          <div class="t">Stored only on this PC</div>
+          <div class="d">Folder: <code class="path" id="setDir">-</code></div>
+          <div class="d dir-moved" id="setDirMoved" hidden>First used in <code class="path" id="setDirPinned">-</code>.
+            This copy runs from a different folder; check that it is the one you meant.</div>
+          <div class="d">Database size: <span id="setSize">-</span> · version <span id="setVer">-</span></div>
+          <div class="d">Daily backups: <span id="setBackups">-</span></div>
+        </div>
+        <div class="setting block">
+          <div class="t">What is recorded</div>
+          <ul class="privacy">
+            <li><b>Counts only.</b> "E was pressed 412 times between 2 and 3 pm." The order of keys is never saved, so nothing you type (passwords included) can be rebuilt.</li>
+            <li>Which app was in front, by program name. Window titles are not saved.</li>
+            <li>Click positions in a coarse 96&times;54 grid, per day.</li>
+            <li>Bytes sent/received per network adapter, per hour.</li>
+            <li>GPU load, temperature and power, CPU power, and which programs used the GPU, per hour.</li>
+            <li>Nothing leaves your PC. gkeystrokes blocks its own outgoing connections, and the dashboard only answers requests from this computer, unless you turn on the phone link (view-only, needs its secret key). See Privacy proof above.</li>
+          </ul>
+        </div>
+        <div class="setting block">
+          <div class="t">Not counted</div>
+          <div class="d">Input while an administrator window is focused (Windows blocks it from normal apps).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="tip" role="tooltip"></div>
+<script src="charts.js"></script>
+<script src="layout.js"></script>
+<script src="app.js"></script>
+<script src="workspace.js"></script>
+<script src="netapps.js"></script>
+</body>
+</html>

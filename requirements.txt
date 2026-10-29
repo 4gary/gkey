@@ -1,0 +1,6 @@
+psutil>=5.9
+# optional: tray icon (the app runs without them)
+pystray>=0.19
+Pillow>=10
+# optional: mini display window (falls back to an Edge window)
+pywebview>=5

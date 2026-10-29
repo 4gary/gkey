@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gkeystrokes mini</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="mini-page">
+<div class="mini-top">
+  <div class="mini-drag pywebview-drag-region" id="miniDrag">gkeystrokes</div>
+  <button type="button" class="btn mini-done" id="miniDone" hidden>Done</button>
+  <button type="button" class="mini-btn" id="miniGear" aria-label="Settings" title="Settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+  </button>
+  <button type="button" class="mini-btn" id="miniClose" aria-label="Close" title="Close">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+<div class="mini-body">
+  <div class="widgets mini-widgets" id="miniWidgets">
+    <div class="widget" data-widget="keys-today"><div class="tile"><div class="label">Keys today</div><div class="value" data-v="keys-today">–</div></div></div>
+    <div class="widget" data-widget="clicks-today"><div class="tile"><div class="label">Clicks today</div><div class="value" data-v="clicks-today">–</div></div></div>
+    <div class="widget" data-widget="current-app"><div class="tile"><div class="label">Now in</div><div class="value text" data-v="current-app">–</div></div></div>
+    <div class="widget" data-widget="kpm"><div class="tile"><div class="label">Keys / min</div><div class="value" data-v="kpm">–</div></div></div>
+    <div class="widget hidden-widget" data-widget="wpm"><div class="tile"><div class="label">Typing speed</div><div class="value" data-v="wpm">–</div></div></div>
+    <div class="widget hidden-widget" data-widget="active-today"><div class="tile"><div class="label">Active today</div><div class="value" data-v="active-today">–</div></div></div>
+    <div class="widget hidden-widget" data-widget="down-now"><div class="tile"><div class="label">Download now</div><div class="value" data-v="down-now">–</div></div></div>
+    <div class="widget hidden-widget" data-widget="up-now"><div class="tile"><div class="label">Upload now</div><div class="value" data-v="up-now">–</div></div></div>
+    <div class="widget hidden-widget" data-widget="apm"><div class="tile"><div class="label">Game APM</div><div class="value" data-v="apm">–</div></div></div>
+    <div class="widget hidden-widget" data-widget="power-now"><div class="tile"><div class="label">Power now</div><div class="value" data-v="power-now">–</div></div></div>
+  </div>
+</div>
+<div class="mini-panel" id="miniPanel" hidden>
+  <div class="mini-row">
+    <button type="button" class="btn" id="miniEdit">Edit stats</button>
+    <button type="button" class="btn" id="miniReset">Reset</button>
+  </div>
+  <label><input type="checkbox" id="miniLock"> Lock position</label>
+  <label>Opacity <input type="range" id="miniOpacity" min="30" max="100" step="5"> <span id="miniOpacityVal"></span></label>
+  <label><input type="checkbox" id="miniClick"> Click-through</label>
+  <div class="mini-note">Turn off from the tray menu</div>
+</div>
+<script src="charts.js"></script>
+<script src="layout.js"></script>
+<script src="mini.js"></script>
+</body>
+</html>
